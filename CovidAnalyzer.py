@@ -87,6 +87,7 @@ def amino_acid_counter(sequence):
     return amino_acid_count
 
 
+# MAKE DataFrame
 codon_counts = codon_counter(human_sequence)
 amino_acid_counts = amino_acid_counter(human_sequence)
 print(codon_counts)
@@ -94,19 +95,33 @@ print(amino_acid_counts)
 
 # test method
 
-table_header = ["AminoAcid", "Codon", "Number", "Ratio"]
-
-table_body = []
-
-table_body.append('arg')
-table_body.append('cgu')
-table_body.append(4)
-table_body.append(2/8)
+# build Table
+all_rows = [[]]
 
 
+for elem in amino_acid_counts.elements():
+    curr_amino_acid = elem
+    curr_amino_acid_count = amino_acid_counts[curr_amino_acid]
 
-print(table_header)
-print(table_body)
+    table_body = []
+    for elem_codon in codon_counts.elements():
+        if codon_dict.get(elem_codon) == elem:
 
-df = pd.DataFrame(table_body)
+            curr_codon_count = codon_counts[elem_codon]
+            curr_codon_ratio = round((curr_codon_count / curr_amino_acid_count),3)
+
+            table_body.append(elem)
+            table_body.append(elem_codon)
+            table_body.append(curr_codon_count)
+            table_body.append(curr_codon_ratio)
+
+            all_rows.append(table_body)
+        continue    
+
+
+
+
+# initialize DataFrame
+df = pd.DataFrame(all_rows[1:], columns=("AminoAcid", "Codon", "Number", "Ratio"))
+
 print(df)
