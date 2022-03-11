@@ -874,6 +874,7 @@ TGCAGCAGAATTGGATGATTTTTCCAAACAACTTCAGAATTCCATGAATGGAGCAACTGATTCAACTCAG
 GCCTAAATTCATGTTGACCACACAAGGCAGATGGGCTA"""
 
 
+
 def codon_counter(sequence):
     """
 
@@ -892,11 +893,6 @@ def codon_counter(sequence):
 
 
 def amino_acid_counter(sequence):
-    """
-
-    :param sequence:
-    :return:
-    """
     amino_acid_list = []
     for i in range(len(sequence) // 3):
         index: int = i * 3
@@ -908,13 +904,34 @@ def amino_acid_counter(sequence):
     return amino_acid_count
 
 
+def fasta_to_string(path):
+    infile = open(path)
+    temp_seq = ""
+    infile.readline()[1:]
+    for line in infile:
+        temp_seq += line
+
+    # Make divisible by three
+    if len(temp_seq) % 3 == 1:
+        temp_seq = temp_seq[1:]
+    elif len(temp_seq) % 3 == 2:
+        temp_seq = temp_seq[2:]
+
+    return temp_seq
+
+
+# make list from fasta Files
+
+
+
+
+
 # Get Data
 codon_counts_human = codon_counter(human_sequence).most_common()
 amino_acid_counts_human = amino_acid_counter(human_sequence).most_common()
 
 codon_counts_bat = codon_counter(bat_sequence).most_common()
 amino_acid_counts_bat = amino_acid_counter(bat_sequence).most_common()
-
 
 # Make Data Frames
 # human data
@@ -923,20 +940,39 @@ codon_counts_human_df.columns = ['Codon', 'Occurrence']
 
 amino_acid_counts_human_df = pd.DataFrame.from_dict(amino_acid_counts_human)
 amino_acid_counts_human_df.columns = ['Amino_Acid', 'Occurrence']
-print("Human Sequence Data")
-print(codon_counts_human_df)
-print(amino_acid_counts_human_df)
+# print("Human Sequence Data")
+# print(codon_counts_human_df)
+# print(amino_acid_counts_human_df)
 
 # bat data
 codon_counts_bat_df = pd.DataFrame.from_dict(codon_counts_bat)
 codon_counts_bat_df.columns = ['Codon', 'Occurrence']
 
-amino_acid_counts_bat_df  = pd.DataFrame.from_dict(amino_acid_counts_bat)
-amino_acid_counts_bat_df.columns = ['Amino_Acid','Occurrence']
+amino_acid_counts_bat_df = pd.DataFrame.from_dict(amino_acid_counts_bat)
+amino_acid_counts_bat_df.columns = ['Amino_Acid', 'Occurrence']
 
 print("Bat Sequence Data")
 print(codon_counts_bat_df)
 print(amino_acid_counts_bat_df)
 
+# codon usage bias
+test = codon_counts_bat_df.iat[0, 0]
+dicTest = codon_dict.get(test)
 
+seqLen = len(human_sequence)
 
+human_sequence = human_sequence[1:seqLen]
+
+test_path = "./CovidSequenceHuman/sequence.fasta"
+
+cur_seq = fasta_to_string(test_path)
+
+seq_list = []
+seq_list.append(cur_seq)
+
+# print(amino_acid_counts_bat)
+from CAI import RSCU
+
+my_rscu = RSCU(seq_list)
+
+print(my_rscu)
