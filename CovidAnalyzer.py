@@ -49,7 +49,7 @@ def codon_counter(sequence):
     """
 
     :param sequence:
-    :return Counter of :
+    :return Counter of seqince [codon:count]
     """
     codon_list = []
     for i in range(len(sequence) // 3):
@@ -63,6 +63,11 @@ def codon_counter(sequence):
 
 
 def amino_acid_counter(sequence):
+    """
+
+     :param sequence:
+     :return Counter of sequence [amino acid:count]
+     """
     amino_acid_list = []
     for i in range(len(sequence) // 3):
         index: int = i * 3
@@ -75,6 +80,11 @@ def amino_acid_counter(sequence):
 
 
 def fasta_to_string(path):
+    """
+       :param path: String path for folder
+       :return:String
+       """
+
     infile = open(path)
     temp_seq = ""
     infile.readline()[1:]
@@ -90,7 +100,12 @@ def fasta_to_string(path):
     return temp_seq
 
 
-def fasta_list_maker(base_path):
+def fasta_string_list_maker(base_path):
+    """
+          :param base_path: String path for folder
+          :return:list of sequnces as strings
+          """
+
     return_list = []
 
     for entry in os.listdir(base_path):
@@ -106,8 +121,12 @@ def amino_acid_list_maker(codon_list):
     return amino_acid_list
 
 
-def df_maker(base_path, name):
-    data = fasta_list_maker(base_path)
+def df_maker(base_path):
+    """
+    :param base_path:
+    :return:dataFrame
+    """
+    data = fasta_string_list_maker(base_path)
     # Calculate RSCU
     temp_rscu = RSCU(data)
 
@@ -132,33 +151,36 @@ def df_maker(base_path, name):
 bat_path = "CovidSequenceBat"
 human_path = "CovidSequenceHuman"
 
-df = df_maker(bat_path, "Bat RSCU")
-df_hum = df_maker(human_path, "Human RSCU")
+df = df_maker(bat_path)
+df_hum = df_maker(human_path)
 
 # MAKING GRAPH
-#sns.set_palette('Paired')
+sns.set_palette('Paired')
 df['Virus'] = 'HKU8'
 df_hum['Virus'] = 'Covid-19'
 
 res: DataFrame | Series = pd.concat([df, df_hum])
 
-#ax = sns.barplot(x='AminoAcid', y='RSCU', data=res, hue='AminoAcid')
-#plt.xticks(rotation=90)
-#
-# Label bar
-#for i in ax.containers:
-    # ax.bar_label(i,)
- #   ax.bar_label(i, rotation=45)
-
-#compare_ax = sns.barplot(x='Codon', y='RSCU', data=res, hue='Virus')
-
-
 # Present Graph
-#fig, axs = plt.subplots(ncols=2)
-#sns.barplot(x='AminoAcid', y='RSCU', data=res, hue='AminoAcid', ax=axs[1])
-#sns.barplot(x='Codon', y='RSCU', data=res, hue='Virus', ax=axs[0])
+fig, axs = plt.subplots(ncols=2)
 
+# make scatter plot
+sns.scatterplot(data=res, x='RSCU', y='Codon', hue='AminoAcid', style='Virus', ax=axs[0])
 
-sns.scatterplot(data=res,x='RSCU',y='Codon',hue='AminoAcid', style = 'Virus')
-plt.legend(bbox_to_anchor=(1.0, 0.9))
+# make bar plot
+ax = sns.barplot(x='RSCU', y='Codon', data=res, hue='Virus', ax=axs[1])
+# show graphs
 plt.show()
+
+# export data to csv
+res.to_csv('data_results.csv')
+
+# STAT ANALYSIS
+# look for correlation between RSCU HUMAN AND BAT
+from sklearn.metrics import r2_score
+
+bat_rscu = df['RSCU']
+hum_rscu = df_hum['RSCU']
+
+r2 = r2_score(hum_rscu, bat_rscu)
+print('r^2 value:', r2)
